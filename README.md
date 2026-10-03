@@ -1,37 +1,15 @@
-# Monolith, Modular Monolith, and Microservices
+# Modular monolith
 
-The same e-commerce purchase, implemented three ways. A customer buys a product:
-
-1. Create the order
-2. Reserve inventory
-3. Process payment
-4. Confirm the order
-
-Check out the branch you want to present. Each branch contains only that architecture.
-
-| Branch | What runs | How the steps talk |
-| --- | --- | --- |
-| `monolith` | One application, one database | In-process method calls |
-| `modular` | One application, three modules, one database | In-process calls across module boundaries |
-| `microservices` | Three applications, three databases | HTTP calls |
+One application, one process, one database. Orders, Payments, and Inventory are separate modules. `OrderService` still calls `InventoryService` and `PaymentService` in-process. No HTTP call leaves the application.
 
 ```powershell
-git checkout monolith
 dotnet run --project ECommerce
 ```
 
-```powershell
-git checkout modular
-dotnet run --project ECommerce
-```
+The API listens on http://localhost:5000. The seeded product is Coffee, price 4.50, stock 20.
 
 ```powershell
-git checkout microservices
-./run-all.ps1
+curl -X POST http://localhost:5000/orders -H "Content-Type: application/json" -d "{\"productId\":\"11111111-1111-1111-1111-111111111111\",\"quantity\":2}"
 ```
 
-Every version accepts the same request. The seeded product is Coffee, price 4.50, stock 20.
-
-```json
-{ "productId": "11111111-1111-1111-1111-111111111111", "quantity": 2 }
-```
+Stock for that product is available at `GET /products/11111111-1111-1111-1111-111111111111`.
