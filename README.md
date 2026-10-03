@@ -1,37 +1,21 @@
-# Monolith, Modular Monolith, and Microservices
+# Microservices
 
-The same e-commerce purchase, implemented three ways. A customer buys a product:
+Three applications, three processes, three databases. The order service does not call payment or inventory code. It calls them over HTTP.
 
-1. Create the order
-2. Reserve inventory
-3. Process payment
-4. Confirm the order
-
-Check out the branch you want to present. Each branch contains only that architecture.
-
-| Branch | What runs | How the steps talk |
+| Service | URL | Database |
 | --- | --- | --- |
-| `monolith` | One application, one database | In-process method calls |
-| `modular` | One application, three modules, one database | In-process calls across module boundaries |
-| `microservices` | Three applications, three databases | HTTP calls |
+| Inventory | http://localhost:5001 | `inventory.db` |
+| Payments | http://localhost:5002 | `payments.db` |
+| Orders | http://localhost:5003 | `orders.db` |
 
 ```powershell
-git checkout monolith
-dotnet run --project ECommerce
-```
-
-```powershell
-git checkout modular
-dotnet run --project ECommerce
-```
-
-```powershell
-git checkout microservices
 ./run-all.ps1
 ```
 
-Every version accepts the same request. The seeded product is Coffee, price 4.50, stock 20.
+The seeded product is Coffee, price 4.50, stock 20. It lives only in the inventory service.
 
-```json
-{ "productId": "11111111-1111-1111-1111-111111111111", "quantity": 2 }
+```powershell
+curl -X POST http://localhost:5003/orders -H "Content-Type: application/json" -d "{\"productId\":\"11111111-1111-1111-1111-111111111111\",\"quantity\":2}"
 ```
+
+If inventory or payments cannot be reached, the order call fails. That network boundary is the difference from the monolith and modular branches.
